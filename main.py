@@ -2,23 +2,23 @@ import discord
 from discord.ext import commands
 import os
 import json
-from keep_alive import keep_alive  # 🔁 Render ping system
+from keep_alive import keep_alive
 
-# Start keep-alive server before bot starts
+# 🔁 Start keep-alive ping server for Render
 keep_alive()
 
-# Enable necessary intents
+# 🔧 Enable necessary intents
 intents = discord.Intents.default()
 intents.messages = True
 intents.guilds = True
 intents.message_content = True
 intents.members = True
 
-# Load config file
+# 📦 Load config.json
 with open("config.json") as f:
     config = json.load(f)
 
-# Create the bot instance
+# 🚀 Create bot
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
@@ -28,20 +28,26 @@ async def on_ready():
 
 @bot.event
 async def setup_hook():
-    # Slash command sync to test server or global
-    if config.get("test_guild_id"):
-        test_guild = discord.Object(id=int(config["test_guild_id"]))
-        await bot.tree.sync(guild=test_guild)
-        print(f"🧪 Slash commands synced to test server: {config['test_guild_id']}")
-    else:
-        await bot.tree.sync()
-        print("🌐 Slash commands synced globally")
+    print("🧪 Syncing slash commands...")
+    try:
+        if config.get("test_guild_id"):
+            test_guild = discord.Object(id=int(config["test_guild_id"]))
+            await bot.tree.sync(guild=test_guild)
+            print(f"✅ Slash commands synced to test server: {config['test_guild_id']}")
+        else:
+            await bot.tree.sync()
+            print("🌐 Slash commands synced globally")
+    except Exception as e:
+        print(f"❌ Error syncing commands: {e}")
 
-# Load all cogs from the cogs/ folder
+# 📂 Load all cogs from the cogs/ folder
 for filename in os.listdir("./cogs"):
     if filename.endswith(".py"):
-        bot.load_extension(f"cogs.{filename[:-3]}")
-        print(f"✅ Loaded extension: {filename}")
+        try:
+            bot.load_extension(f"cogs.{filename[:-3]}")
+            print(f"✅ Loaded extension: {filename}")
+        except Exception as e:
+            print(f"❌ Failed to load {filename}: {e}")
 
-# Run the bot using the TOKEN from Render environment
+# 🔑 Start the bot with token from environment
 bot.run(os.environ["TOKEN"])
