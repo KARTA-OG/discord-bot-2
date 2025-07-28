@@ -4,10 +4,10 @@ import os
 import json
 from keep_alive import keep_alive
 
-# 🔁 Start keep-alive ping server for Render
+# 🔁 Start keep-alive server for Render
 keep_alive()
 
-# 🔧 Enable necessary intents
+# 🔧 Enable required intents
 intents = discord.Intents.default()
 intents.messages = True
 intents.guilds = True
@@ -30,7 +30,7 @@ async def on_ready():
 async def setup_hook():
     print("🧪 Syncing slash commands and loading cogs...")
 
-    # 🔄 Load all cogs with await
+    # 🔄 Load all cogs
     for filename in os.listdir("./cogs"):
         if filename.endswith(".py"):
             try:
@@ -39,17 +39,16 @@ async def setup_hook():
             except Exception as e:
                 print(f"❌ Failed to load {filename}: {e}")
 
-    # 🔃 Sync slash commands
+    # 🧪 Sync slash commands to test server
     try:
         if config.get("test_guild_id"):
             test_guild = discord.Object(id=int(config["test_guild_id"]))
             await bot.tree.sync(guild=test_guild)
             print(f"✅ Slash commands synced to test server: {config['test_guild_id']}")
         else:
-            await bot.tree.sync()
-            print("🌐 Slash commands synced globally")
+            print("⚠️ No test_guild_id provided.")
     except Exception as e:
         print(f"❌ Error syncing commands: {e}")
 
-# 🔑 Start the bot with token from Render environment variable
+# 🔑 Start the bot
 bot.run(os.environ["TOKEN"])
